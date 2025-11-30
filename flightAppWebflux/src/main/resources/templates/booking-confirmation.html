@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"/><title>Booking Confirmation</title></head>
+<body>
+  <h2>Hi <span th:text="${name}">Passenger</span>,</h2>
+  <p>Your booking is confirmed. PNR: <strong th:text="${pnr}">PNR</strong></p>
+  <p>Flight: <span th:text="${flight}"></span> | Seat: <span th:text="${seat}"></span></p>
+  <p>Departure: <span th:text="${departure}"></span> | Arrival: <span th:text="${arrival}"></span></p>
+  <br/>
+  <p>Thanks,<br/>Flight Booking Team</p>
+</body>
+</html>

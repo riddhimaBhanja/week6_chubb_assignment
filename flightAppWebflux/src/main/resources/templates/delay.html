@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"/><title>Flight Delay Notice</title></head>
+<body>
+  <h2>Hi <span th:text="${name}">Passenger</span>,</h2>
+  <p>Your flight is delayed. PNR: <strong th:text="${pnr}">PNR</strong></p>
+  <p>Reason: <span th:text="${reason}"></span></p>
+  <p>New Departure Time: <span th:text="${newDeparture}"></span></p>
+  <br/>
+  <p>Sorry for the inconvenience,<br/>Flight Booking Team</p>
+</body>
+</html>
