@@ -1,0 +1,215 @@
+{
+  "info": {
+    "name": "Flight Booking Microservices",
+    "description": "API collection for Flight Booking Microservices",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Flight Service",
+      "item": [
+        {
+          "name": "Add Flight Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"airline\": \"Air India\",\n  \"flightNumber\": \"AI101\",\n  \"fromPlace\": \"Delhi\",\n  \"toPlace\": \"Mumbai\",\n  \"departureDateTime\": \"2024-12-15T10:00:00\",\n  \"arrivalDateTime\": \"2024-12-15T12:30:00\",\n  \"totalSeats\": 180,\n  \"ticketPrice\": 5000.0,\n  \"oneWayPrice\": 5000.0,\n  \"roundTripPrice\": 9000.0,\n  \"mealAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/flight/inventory",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "flight", "inventory"]
+            }
+          }
+        },
+        {
+          "name": "Search Flights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromPlace\": \"Delhi\",\n  \"toPlace\": \"Mumbai\",\n  \"journeyDate\": \"2024-12-15\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/flight/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "flight", "search"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Booking Service",
+      "item": [
+        {
+          "name": "Book Flight",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"John Doe\",\n  \"userEmail\": \"john.doe@example.com\",\n  \"journeyDate\": \"2024-12-15\",\n  \"noOfSeats\": 2,\n  \"mealType\": \"VEG\",\n  \"passengers\": [\n    {\n      \"name\": \"John Doe\",\n      \"gender\": \"Male\",\n      \"age\": 30,\n      \"seatNumber\": \"12A\",\n      \"email\": \"john.doe@example.com\"\n    },\n    {\n      \"name\": \"Jane Doe\",\n      \"gender\": \"Female\",\n      \"age\": 28,\n      \"seatNumber\": \"12B\",\n      \"email\": \"jane.doe@example.com\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/booking/book/:flightId",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "booking", "book", ":flightId"],
+              "variable": [
+                {
+                  "key": "flightId",
+                  "value": "FLIGHT_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Booking by PNR",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/booking/:pnr",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "booking", ":pnr"],
+              "variable": [
+                {
+                  "key": "pnr",
+                  "value": "PNR_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Booking History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/booking/history/:email",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "booking", "history", ":email"],
+              "variable": [
+                {
+                  "key": "email",
+                  "value": "john.doe@example.com"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/booking/cancel/:pnr",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "booking", "cancel", ":pnr"],
+              "variable": [
+                {
+                  "key": "pnr",
+                  "value": "PNR_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Checks",
+      "item": [
+        {
+          "name": "Eureka Server",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8761/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8761",
+              "path": [""]
+            }
+          }
+        },
+        {
+          "name": "API Gateway Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/actuator/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "Flight Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/actuator/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "Booking Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/actuator/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["actuator", "health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
