@@ -1,0 +1,13 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Flight Service,com.flightapp.flight.dto,InventoryRequest,395,120,94,0,0,15,51,25,4,25
+Flight Service,com.flightapp.flight.dto,InventoryRequest.InventoryRequestBuilder,24,84,0,0,0,1,1,13,1,13
+Flight Service,com.flightapp.flight.dto,FlightSearchRequest.FlightSearchRequestBuilder,8,28,0,0,0,1,1,5,1,5
+Flight Service,com.flightapp.flight.dto,FlightSearchRequest,131,40,30,0,0,7,19,9,4,9
+Flight Service,com.flightapp.flight,FlightServiceApplication,5,3,0,0,2,1,1,1,1,1
+Flight Service,com.flightapp.flight.service,FlightServiceImpl,0,177,0,6,0,39,0,15,0,12
+Flight Service,com.flightapp.flight.config,ErrorHandler,25,43,0,0,5,9,1,3,1,3
+Flight Service,com.flightapp.flight.entity,FlightInventory.FlightInventoryBuilder,30,105,0,0,0,1,1,16,1,16
+Flight Service,com.flightapp.flight.entity,FlightInventory,494,150,118,0,0,18,63,31,4,31
+Flight Service,com.flightapp.flight.constants,FlightStatus,0,15,0,0,0,2,0,1,0,1
+Flight Service,com.flightapp.flight.exception,FlightNotFoundException,0,4,0,0,0,2,0,1,0,1
+Flight Service,com.flightapp.flight.controller,FlightController,0,34,0,0,0,6,0,6,0,6
