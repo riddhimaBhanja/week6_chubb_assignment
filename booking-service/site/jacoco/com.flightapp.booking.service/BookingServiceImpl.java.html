@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BookingServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Booking Service</a> &gt; <a href="index.source.html" class="el_package">com.flightapp.booking.service</a> &gt; <span class="el_source">BookingServiceImpl.java</span></div><h1>BookingServiceImpl.java</h1><pre class="source lang-java linenums">package com.flightapp.booking.service;
+
+import com.flightapp.booking.client.FlightServiceWebClient;
+import com.flightapp.booking.constants.BookingStatus;
+import com.flightapp.booking.dto.BookRequest;
+import com.flightapp.booking.dto.BookingResponse;
+import com.flightapp.booking.dto.FlightDto;
+import com.flightapp.booking.entity.Booking;
+import com.flightapp.booking.event.BookingEvent;
+import com.flightapp.booking.exception.BookingNotFoundException;
+import com.flightapp.booking.repository.BookingRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Service
+<span class="fc" id="L26">@RequiredArgsConstructor</span>
+<span class="fc" id="L27">@Slf4j</span>
+public class BookingServiceImpl implements BookingService {
+
+    private final BookingRepository bookingRepository;
+    private final FlightServiceWebClient flightServiceClient;
+    private final RabbitTemplate rabbitTemplate;
+
+    @Value(&quot;${rabbitmq.exchange}&quot;)
+    private String exchange;
+
+    @Value(&quot;${rabbitmq.routing-key}&quot;)
+    private String routingKey;
+
+    @Override
+    @CircuitBreaker(name = &quot;flightService&quot;, fallbackMethod = &quot;bookTicketFallback&quot;)
+    @Retry(name = &quot;flightService&quot;)
+    public Mono&lt;BookingResponse&gt; bookTicket(String flightId, BookRequest request) {
+<span class="fc" id="L44">        return flightServiceClient.getFlightById(flightId)</span>
+<span class="fc" id="L45">                .flatMap(flight -&gt; {</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">                    if (flight.getAvailableSeats() &lt; request.getNoOfSeats()) {</span>
+<span class="fc" id="L47">                        return Mono.error(new IllegalArgumentException(&quot;Not enough seats available&quot;));</span>
+                    }
+
+<span class="fc" id="L50">                    return flightServiceClient.updateSeats(flightId, request.getNoOfSeats())</span>
+<span class="fc" id="L51">                            .flatMap(updatedFlight -&gt; createBooking(flightId, flight, request));</span>
+                })
+<span class="fc" id="L53">                .flatMap(booking -&gt; {</span>
+<span class="fc" id="L54">                    publishBookingEvent(booking, &quot;BOOKING_CONFIRMED&quot;);</span>
+<span class="fc" id="L55">                    return Mono.just(mapToResponse(booking));</span>
+                })
+<span class="fc" id="L57">                .doOnSuccess(response -&gt; log.info(&quot;Booking created with PNR: {}&quot;, response.getPnr()))</span>
+<span class="fc" id="L58">                .doOnError(error -&gt; log.error(&quot;Error creating booking: {}&quot;, error.getMessage()));</span>
+    }
+
+    private Mono&lt;Booking&gt; createBooking(String flightId, FlightDto flight, BookRequest request) {
+<span class="fc" id="L62">        String pnr = generatePNR();</span>
+
+<span class="fc" id="L64">        Booking booking = Booking.builder()</span>
+<span class="fc" id="L65">                .pnr(pnr)</span>
+<span class="fc" id="L66">                .flightId(flightId)</span>
+<span class="fc" id="L67">                .flightNumber(flight.getFlightNumber())</span>
+<span class="fc" id="L68">                .airline(flight.getAirline())</span>
+<span class="fc" id="L69">                .fromPlace(flight.getFromPlace())</span>
+<span class="fc" id="L70">                .toPlace(flight.getToPlace())</span>
+<span class="fc" id="L71">                .departureDateTime(flight.getDepartureDateTime())</span>
+<span class="fc" id="L72">                .arrivalDateTime(flight.getArrivalDateTime())</span>
+<span class="fc" id="L73">                .userName(request.getUserName())</span>
+<span class="fc" id="L74">                .userEmail(request.getUserEmail())</span>
+<span class="fc" id="L75">                .journeyDate(request.getJourneyDate())</span>
+<span class="fc" id="L76">                .noOfSeats(request.getNoOfSeats())</span>
+<span class="fc" id="L77">                .mealType(request.getMealType())</span>
+<span class="fc" id="L78">                .totalAmount(flight.getTicketPrice() * request.getNoOfSeats())</span>
+<span class="fc" id="L79">                .bookingStatus(BookingStatus.CONFIRMED)</span>
+<span class="fc" id="L80">                .bookingDateTime(LocalDateTime.now())</span>
+<span class="fc" id="L81">                .passengers(request.getPassengers())</span>
+<span class="fc" id="L82">                .build();</span>
+
+<span class="fc" id="L84">        return bookingRepository.save(booking);</span>
+    }
+
+    @Override
+    public Mono&lt;BookingResponse&gt; getBookingByPnr(String pnr) {
+<span class="fc" id="L89">        return bookingRepository.findByPnr(pnr)</span>
+<span class="fc" id="L90">                .switchIfEmpty(Mono.error(new BookingNotFoundException(&quot;Booking not found with PNR: &quot; + pnr)))</span>
+<span class="fc" id="L91">                .map(this::mapToResponse);</span>
+    }
+
+    @Override
+    public Flux&lt;BookingResponse&gt; getBookingHistory(String email) {
+<span class="fc" id="L96">        return bookingRepository.findByUserEmail(email)</span>
+<span class="fc" id="L97">                .map(this::mapToResponse);</span>
+    }
+
+    @Override
+    public Mono&lt;BookingResponse&gt; cancelBooking(String pnr) {
+<span class="fc" id="L102">        return bookingRepository.findByPnr(pnr)</span>
+<span class="fc" id="L103">                .switchIfEmpty(Mono.error(new BookingNotFoundException(&quot;Booking not found with PNR: &quot; + pnr)))</span>
+<span class="fc" id="L104">                .flatMap(booking -&gt; {</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">                    if (booking.getBookingStatus() == BookingStatus.CANCELLED) {</span>
+<span class="fc" id="L106">                        return Mono.error(new IllegalArgumentException(&quot;Booking is already cancelled&quot;));</span>
+                    }
+
+<span class="fc" id="L109">                    booking.setBookingStatus(BookingStatus.CANCELLED);</span>
+<span class="fc" id="L110">                    return bookingRepository.save(booking);</span>
+                })
+<span class="fc" id="L112">                .flatMap(booking -&gt; {</span>
+<span class="fc" id="L113">                    publishBookingEvent(booking, &quot;BOOKING_CANCELLED&quot;);</span>
+<span class="fc" id="L114">                    return Mono.just(mapToResponse(booking));</span>
+                })
+<span class="fc" id="L116">                .doOnSuccess(response -&gt; log.info(&quot;Booking cancelled with PNR: {}&quot;, pnr));</span>
+    }
+
+    private void publishBookingEvent(Booking booking, String eventType) {
+<span class="fc" id="L120">        BookingEvent event = BookingEvent.builder()</span>
+<span class="fc" id="L121">                .pnr(booking.getPnr())</span>
+<span class="fc" id="L122">                .userEmail(booking.getUserEmail())</span>
+<span class="fc" id="L123">                .userName(booking.getUserName())</span>
+<span class="fc" id="L124">                .flightNumber(booking.getFlightNumber())</span>
+<span class="fc" id="L125">                .fromPlace(booking.getFromPlace())</span>
+<span class="fc" id="L126">                .toPlace(booking.getToPlace())</span>
+<span class="fc" id="L127">                .departureDateTime(booking.getDepartureDateTime())</span>
+<span class="fc" id="L128">                .totalAmount(booking.getTotalAmount())</span>
+<span class="fc" id="L129">                .eventType(eventType)</span>
+<span class="fc" id="L130">                .build();</span>
+
+<span class="fc" id="L132">        rabbitTemplate.convertAndSend(exchange, routingKey, event);</span>
+<span class="fc" id="L133">        log.info(&quot;Published booking event: {} for PNR: {}&quot;, eventType, booking.getPnr());</span>
+<span class="fc" id="L134">    }</span>
+
+    private String generatePNR() {
+<span class="fc" id="L137">        return &quot;PNR&quot; + UUID.randomUUID().toString().substring(0, 8).toUpperCase();</span>
+    }
+
+    private BookingResponse mapToResponse(Booking booking) {
+<span class="fc" id="L141">        return BookingResponse.builder()</span>
+<span class="fc" id="L142">                .pnr(booking.getPnr())</span>
+<span class="fc" id="L143">                .flightId(booking.getFlightId())</span>
+<span class="fc" id="L144">                .flightNumber(booking.getFlightNumber())</span>
+<span class="fc" id="L145">                .airline(booking.getAirline())</span>
+<span class="fc" id="L146">                .fromPlace(booking.getFromPlace())</span>
+<span class="fc" id="L147">                .toPlace(booking.getToPlace())</span>
+<span class="fc" id="L148">                .departureDateTime(booking.getDepartureDateTime())</span>
+<span class="fc" id="L149">                .arrivalDateTime(booking.getArrivalDateTime())</span>
+<span class="fc" id="L150">                .userName(booking.getUserName())</span>
+<span class="fc" id="L151">                .userEmail(booking.getUserEmail())</span>
+<span class="fc" id="L152">                .journeyDate(booking.getJourneyDate())</span>
+<span class="fc" id="L153">                .noOfSeats(booking.getNoOfSeats())</span>
+<span class="fc" id="L154">                .mealType(booking.getMealType())</span>
+<span class="fc" id="L155">                .totalAmount(booking.getTotalAmount())</span>
+<span class="fc" id="L156">                .bookingStatus(booking.getBookingStatus())</span>
+<span class="fc" id="L157">                .bookingDateTime(booking.getBookingDateTime())</span>
+<span class="fc" id="L158">                .passengers(booking.getPassengers())</span>
+<span class="fc" id="L159">                .build();</span>
+    }
+
+    private Mono&lt;BookingResponse&gt; bookTicketFallback(String flightId, BookRequest request, Exception ex) {
+<span class="nc" id="L163">        log.error(&quot;Circuit breaker fallback - Flight service is unavailable: {}&quot;, ex.getMessage());</span>
+<span class="nc" id="L164">        return Mono.error(new RuntimeException(&quot;Flight service is currently unavailable. Please try again later.&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

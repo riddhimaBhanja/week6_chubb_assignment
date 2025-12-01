@@ -1,0 +1,23 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Booking Service,com.flightapp.booking.dto,BookRequest,255,45,54,0,2,8,33,13,6,13
+Booking Service,com.flightapp.booking.dto,FlightDto.FlightDtoBuilder,48,78,0,0,0,1,5,11,5,11
+Booking Service,com.flightapp.booking.dto,BookingResponse.BookingResponseBuilder,36,126,0,0,0,1,1,19,1,19
+Booking Service,com.flightapp.booking.dto,BookRequest.BookRequestBuilder,63,0,0,0,1,0,9,0,9,0
+Booking Service,com.flightapp.booking.dto,BookingResponse,593,180,142,0,0,21,75,37,4,37
+Booking Service,com.flightapp.booking.dto,FlightDto,527,74,110,0,6,11,77,11,22,11
+Booking Service,com.flightapp.booking.constants,BookingStatus,0,15,0,0,0,2,0,1,0,1
+Booking Service,com.flightapp.booking.constants,MealType,0,21,0,0,0,2,0,1,0,1
+Booking Service,com.flightapp.booking,BookingServiceApplication,5,3,0,0,2,1,1,1,1,1
+Booking Service,com.flightapp.booking.config,ErrorHandler,45,23,0,0,9,5,2,2,2,2
+Booking Service,com.flightapp.booking.config,RabbitMQConfig,39,0,0,0,8,0,6,0,6,0
+Booking Service,com.flightapp.booking.controller,BookingController,0,27,0,0,0,5,0,5,0,5
+Booking Service,com.flightapp.booking.service,EmailService,171,0,8,0,36,0,10,0,6,0
+Booking Service,com.flightapp.booking.service,BookingServiceImpl,11,333,0,4,2,84,1,20,1,18
+Booking Service,com.flightapp.booking.exception,BookingNotFoundException,0,4,0,0,0,2,0,1,0,1
+Booking Service,com.flightapp.booking.entity,Booking.BookingBuilder,43,128,0,0,0,1,2,19,2,19
+Booking Service,com.flightapp.booking.entity,Passenger,197,60,46,0,0,9,27,13,4,13
+Booking Service,com.flightapp.booking.entity,Booking,700,116,150,0,2,20,98,20,23,20
+Booking Service,com.flightapp.booking.entity,Passenger.PassengerBuilder,17,37,0,0,0,1,2,6,2,6
+Booking Service,com.flightapp.booking.event,BookingEvent.BookingEventBuilder,20,70,0,0,0,1,1,11,1,11
+Booking Service,com.flightapp.booking.event,BookingEvent,395,34,78,0,11,2,62,2,23,2
+Booking Service,com.flightapp.booking.client,FlightServiceWebClient,57,0,0,0,19,0,5,0,5,0

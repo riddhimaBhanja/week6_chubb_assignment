@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FlightDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Booking Service</a> &gt; <a href="index.source.html" class="el_package">com.flightapp.booking.dto</a> &gt; <span class="el_source">FlightDto.java</span></div><h1>FlightDto.java</h1><pre class="source lang-java linenums">package com.flightapp.booking.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+<span class="pc bnc" id="L10" title="All 110 branches missed.">@Data</span>
+<span class="pc" id="L11">@Builder</span>
+<span class="nc" id="L12">@NoArgsConstructor</span>
+<span class="fc" id="L13">@AllArgsConstructor</span>
+public class FlightDto {
+<span class="nc" id="L15">    private String id;</span>
+<span class="fc" id="L16">    private String airline;</span>
+<span class="fc" id="L17">    private String flightNumber;</span>
+<span class="fc" id="L18">    private String fromPlace;</span>
+<span class="fc" id="L19">    private String toPlace;</span>
+<span class="fc" id="L20">    private LocalDateTime departureDateTime;</span>
+<span class="fc" id="L21">    private LocalDateTime arrivalDateTime;</span>
+<span class="nc" id="L22">    private Integer totalSeats;</span>
+<span class="fc" id="L23">    private Integer availableSeats;</span>
+<span class="fc" id="L24">    private Double ticketPrice;</span>
+<span class="nc" id="L25">    private Double oneWayPrice;</span>
+<span class="nc" id="L26">    private Double roundTripPrice;</span>
+<span class="nc" id="L27">    private Boolean mealAvailable;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

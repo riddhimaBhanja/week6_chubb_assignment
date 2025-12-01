@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Booking Service</a> &gt; <a href="index.source.html" class="el_package">com.flightapp.booking.service</a> &gt; <span class="el_source">EmailService.java</span></div><h1>EmailService.java</h1><pre class="source lang-java linenums">package com.flightapp.booking.service;
+
+import com.flightapp.booking.event.BookingEvent;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="nc" id="L12">@RequiredArgsConstructor</span>
+<span class="nc" id="L13">@Slf4j</span>
+public class EmailService {
+
+    private final JavaMailSender mailSender;
+
+    @RabbitListener(queues = &quot;${rabbitmq.queue}&quot;)
+    public void handleBookingEvent(BookingEvent event) {
+<span class="nc" id="L20">        log.info(&quot;Received booking event: {} for PNR: {}&quot;, event.getEventType(), event.getPnr());</span>
+<span class="nc" id="L21">        sendEmail(event);</span>
+<span class="nc" id="L22">    }</span>
+
+    private void sendEmail(BookingEvent event) {
+        try {
+<span class="nc" id="L26">            SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="nc" id="L27">            message.setTo(event.getUserEmail());</span>
+<span class="nc" id="L28">            message.setSubject(getEmailSubject(event.getEventType()));</span>
+<span class="nc" id="L29">            message.setText(buildEmailBody(event));</span>
+<span class="nc" id="L30">            message.setFrom(&quot;riddhimabhanja2003@gmail.com&quot;);</span>
+
+<span class="nc" id="L32">            mailSender.send(message);</span>
+<span class="nc" id="L33">            log.info(&quot;Email sent successfully to: {}&quot;, event.getUserEmail());</span>
+<span class="nc" id="L34">        } catch (Exception e) {</span>
+<span class="nc" id="L35">            log.error(&quot;Failed to send email: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L36">        }</span>
+<span class="nc" id="L37">    }</span>
+
+    private String getEmailSubject(String eventType) {
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (&quot;BOOKING_CONFIRMED&quot;.equals(eventType)) {</span>
+<span class="nc" id="L41">            return &quot;Flight Booking Confirmed&quot;;</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        } else if (&quot;BOOKING_CANCELLED&quot;.equals(eventType)) {</span>
+<span class="nc" id="L43">            return &quot;Flight Booking Cancelled&quot;;</span>
+        }
+<span class="nc" id="L45">        return &quot;Flight Booking Update&quot;;</span>
+    }
+
+    private String buildEmailBody(BookingEvent event) {
+<span class="nc" id="L49">        StringBuilder body = new StringBuilder();</span>
+<span class="nc" id="L50">        body.append(&quot;Dear &quot;).append(event.getUserName()).append(&quot;,\n\n&quot;);</span>
+
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if (&quot;BOOKING_CONFIRMED&quot;.equals(event.getEventType())) {</span>
+<span class="nc" id="L53">            body.append(&quot;Your flight booking has been confirmed!\n\n&quot;);</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        } else if (&quot;BOOKING_CANCELLED&quot;.equals(event.getEventType())) {</span>
+<span class="nc" id="L55">            body.append(&quot;Your flight booking has been cancelled.\n\n&quot;);</span>
+        }
+
+<span class="nc" id="L58">        body.append(&quot;Booking Details:\n&quot;);</span>
+<span class="nc" id="L59">        body.append(&quot;PNR: &quot;).append(event.getPnr()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L60">        body.append(&quot;Flight: &quot;).append(event.getFlightNumber()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L61">        body.append(&quot;Route: &quot;).append(event.getFromPlace()).append(&quot; to &quot;).append(event.getToPlace()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L62">        body.append(&quot;Departure: &quot;).append(event.getDepartureDateTime()).append(&quot;\n&quot;);</span>
+<span class="nc" id="L63">        body.append(&quot;Total Amount: $&quot;).append(event.getTotalAmount()).append(&quot;\n\n&quot;);</span>
+<span class="nc" id="L64">        body.append(&quot;Thank you for choosing our service!\n\n&quot;);</span>
+<span class="nc" id="L65">        body.append(&quot;Best regards,\nFlight Booking Team&quot;);</span>
+
+<span class="nc" id="L67">        return body.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
